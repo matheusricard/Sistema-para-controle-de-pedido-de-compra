@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Relatório por equipamento (TAG){% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h3 class="mb-0">Relatório por equipamento (TAG)</h3>
+
+  
+</div>
+
+<form method="get" action="{{ url_for('relatorios_equipamentos') }}" class="row g-3 mb-3">
+  <div class="col-md-6">
+    <label class="form-label">TAG (pode selecionar várias)</label>
+    <select class="form-select" name="tags" multiple size="8">
+     {% for t in lista_tags %}
+     <option value="{{ t }}" {% if t|upper in (filtros.tags or []) %}selected{% endif %}>
+      {{ t }}
+     </option>
+     {% endfor %}
+    </select>
+
+    <div class="form-text">
+      Segure <b>Ctrl</b> (Windows) para selecionar várias, ou <b>Shift</b> para intervalo.
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <label class="form-label">Status</label>
+    <select class="form-select" name="status">
+      <option value="">Todos</option>
+      {% for s in lista_status %}
+        <option value="{{ s }}" {% if filtros.status == s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+
+    <div class="d-flex gap-2 mt-3">
+      <button type="submit" class="btn btn-primary w-100">Aplicar</button>
+
+      <!-- Baixar PDF com os MESMOS filtros -->
+      <button type="submit"
+              class="btn btn-outline-danger w-100"
+              formaction="{{ url_for('relatorios_equipamentos_pdf') }}">
+        Baixar PDF
+      </button>
+    </div>
+  </div>
+</form>
+
+
+
+<div class="alert alert-light border d-flex justify-content-between align-items-center">
+  <div><strong>Total geral:</strong> R$ {{ total_geral|brl }}</div>
+  <small class="text-muted">Exibindo somente SC, PC, Itens e Valor</small>
+</div>
+
+{% if not grupos %}
+  <p class="text-muted">Nenhum registro encontrado com os filtros atuais.</p>
+{% else %}
+  {% for tag, info in grupos.items() %}
+    <div class="card mb-3">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="fw-semibold">
+          TAG: {{ tag }}
+          {% if info.nome_veiculo %}
+            <span class="text-muted">— {{ info.nome_veiculo }}</span>
+          {% endif %}
+        </div>
+        <div class="fw-semibold">
+          Total da TAG: R$ {{ info.total|brl }}
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 90px;">SC</th>
+              <th style="width: 90px;">PC</th>
+              <th>Itens</th>
+              <th class="text-end" style="width: 130px;">Valor (R$)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in info.pedidos %}
+              <tr>
+                <td>{{ p.numero_sc }}</td>
+                <td>{{ p.numero_pc }}</td>
+                <td style="white-space: pre-wrap;">{{ p.descricao_itens }}</td>
+                <td class="text-end">R$ {{ (p.valor_pedido or 0)|brl }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endfor %}
+{% endif %}
+{% endblock %}

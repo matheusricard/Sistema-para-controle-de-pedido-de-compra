@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Alterar senha{% endblock %}
+
+{% block content %}
+<h3 class="mb-3">Alterar senha</h3>
+
+<form method="post" class="col-md-6">
+  <div class="mb-3">
+    <label class="form-label">Senha atual</label>
+    <input type="password" name="senha_atual" class="form-control" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Nova senha</label>
+    <input type="password" name="nova_senha" class="form-control" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Confirmar nova senha</label>
+    <input type="password" name="confirmar" class="form-control" required>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Salvar</button>
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

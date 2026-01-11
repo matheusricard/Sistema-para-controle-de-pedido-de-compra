@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Novo Pedido{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0">Novo Pedido</h4>
+  <a class="btn btn-outline-secondary" href="{{ url_for('listar_pedidos') }}">Voltar</a>
+</div>
+
+<form method="post" class="row g-3">
+
+  <div class="col-md-4">
+    <label class="form-label">Equipamento</label>
+    <input name="nome_veiculo" class="form-control" placeholder="Ex: RCD-14">
+  </div>
+
+  <div class="col-md-4">
+    <label class="form-label">TAG</label>
+    <input name="tag" class="form-control" placeholder="Ex: CPM-09" required>
+  </div>
+
+  <div class="col-md-4">
+    <label class="form-label">Obra</label>
+    <input name="obra" class="form-control" placeholder="Ex: PROSAP / Porto Barcarena">
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label">SC</label>
+    <input name="numero_sc" class="form-control" placeholder="Ex: 8828">
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label">Data SC</label>
+    <input type="date" name="data_criacao_sc" class="form-control">
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label">PC</label>
+    <input name="numero_pc" class="form-control" placeholder="Ex: 12345">
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label">Valor (R$)</label>
+    <input name="valor_pedido" class="form-control" placeholder="Ex: 1.234,56">
+  </div>
+
+  <div class="col-md-6">
+    <label class="form-label">Fornecedor</label>
+    <input name="nome_fornecedor" class="form-control" placeholder="Ex: Para Todos">
+  </div>
+
+  <div class="col-md-6">
+    <label class="form-label">Status</label>
+    <select name="status_pedido" class="form-select">
+      <option value="">Selecione...</option>
+      <option>EM ABERTO</option>
+      <option>AGUARDANDO PAGAMENTO</option>
+      <option>PAGO</option>
+      <option>CANCELADO</option>
+    </select>
+  </div>
+
+  <div class="col-12">
+    <label class="form-label">Itens</label>
+    <textarea name="descricao_itens" class="form-control" rows="4" placeholder="Descreva os itens..." required></textarea>
+  </div>
+
+  <div class="col-12">
+    <button class="btn btn-primary">Salvar</button>
+  </div>
+</form>
+
+{% endblock %}

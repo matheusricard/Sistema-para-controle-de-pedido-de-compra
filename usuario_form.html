@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Novo usuário{% endblock %}
+
+{% block content %}
+<h3 class="mb-3">Cadastrar novo usuário</h3>
+
+<form method="post" class="col-md-6">
+  <div class="mb-3">
+    <label class="form-label">Usuário (login)</label>
+    <input type="text" name="username" class="form-control" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Senha</label>
+    <input type="password" name="senha" class="form-control" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Confirmar senha</label>
+    <input type="password" name="confirmar" class="form-control" required>
+  </div>
+
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" name="is_admin" id="is_admin">
+    <label class="form-check-label" for="is_admin">
+      Usuário administrador
+    </label>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Salvar</button>
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

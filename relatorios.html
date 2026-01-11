@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Relatórios{% endblock %}
+
+{% block content %}
+<h3 class="mb-3">Relatório geral de pedidos</h3>
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-2">
+    <label class="form-label">Data SC (início)</label>
+    <input type="date" name="data_inicio" class="form-control"
+           value="{{ filtros.data_inicio }}">
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">Data SC (fim)</label>
+    <input type="date" name="data_fim" class="form-control"
+           value="{{ filtros.data_fim }}">
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">Status</label>
+    <select name="status_pedido" class="form-select">
+      <option value="">Todos</option>
+      {% for st in lista_status %}
+      <option value="{{ st }}"
+        {% if filtros.status_pedido == st %}selected{% endif %}>
+        {{ st }}
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label">Fornecedor</label>
+    <input type="text" name="fornecedor" class="form-control"
+           placeholder="Nome contém..."
+           value="{{ filtros.fornecedor }}">
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label">Obra</label>
+    <input type="text" name="obra" class="form-control"
+           placeholder="Obra contém..."
+           value="{{ filtros.obra }}">
+  </div>
+
+  <div class="col-md-6">
+    <label class="form-label">TAGs</label>
+    <select name="tags" class="form-select" multiple size="4">
+      {% for tag in todas_tags %}
+      <option value="{{ tag }}"
+        {% if tag in filtros.tags %}selected{% endif %}>
+        {{ tag }}
+      </option>
+      {% endfor %}
+    </select>
+    <div class="form-text">
+      Segure Ctrl (ou Shift) para selecionar várias TAGs.
+    </div>
+  </div>
+
+  <div class="col-md-3 d-flex align-items-end">
+    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+  </div>
+
+  <div class="col-md-3 d-flex align-items-end">
+    <button type="submit"
+            class="btn btn-outline-secondary w-100"
+            formaction="{{ url_for('relatorios_pdf') }}"
+            formmethod="get">
+      Gerar PDF
+    </button>
+  </div>
+</form>
+
+<div class="mb-2 text-end">
+  <strong>Total filtrado: R$ {{ total_valor|brl }}</strong>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-sm table-striped table-hover align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>ID</th>
+        <th>Data SC</th>
+        <th>Equipamento</th>
+        <th>TAG</th>
+        <th>SC</th>
+        <th>PC</th>
+        <th>Itens</th>
+        <th>Fornecedor</th>
+        <th>Obra</th>
+        <th>Status</th>
+        <th>Valor (R$)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in resultados %}
+      <tr>
+        <td>{{ r.id }}</td>
+        <td>{{ r.data_criacao_sc }}</td>
+        <td>{{ r.nome_veiculo }}</td>
+        <td>{{ r.tag }}</td>
+        <td>{{ r.numero_sc }}</td>
+        <td>{{ r.numero_pc }}</td>
+        <td>{{ r.descricao_itens }}</td>
+        <td>{{ r.nome_fornecedor }}</td>
+        <td>{{ r.obra }}</td>
+        <td>{{ r.status_pedido }}</td>
+        <td>R$ {{ r.valor_pedido|brl }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="11" class="text-center">Nenhum registro encontrado com esses filtros.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

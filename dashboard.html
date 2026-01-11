@@ -1,0 +1,329 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h3 class="mb-3">Dashboard</h3>
+
+<!-- Filtros do dashboard -->
+<form method="get" class="row g-3 mb-4">
+  <div class="col-md-3">
+    <label class="form-label">Data início (SC)</label>
+    <input type="date" class="form-control" name="data_inicio" value="{{ filtros["data_inicio"] }}">
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label">Data fim (SC)</label>
+    <input type="date" class="form-control" name="data_fim" value="{{ filtros["data_fim"] }}">
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label">Obra</label>
+    <select class="form-select" name="obra">
+      <option value="">Todas</option>
+      {% for o in lista_obras %}
+        <option value="{{ o }}" {% if filtros["obra"] == o %}selected{% endif %}>{{ o }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label">Equipamento</label>
+    <select class="form-select" name="veiculo">
+      <option value="">Todos</option>
+      {% for v in lista_veiculos %}
+        <option value="{{ v }}" {% if filtros["veiculo"] == v %}selected{% endif %}>{{ v }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label">TAG</label>
+    <select class="form-select" name="tag">
+      <option value="">Todas</option>
+      {% for t in lista_tags %}
+        <option value="{{ t }}" {% if filtros["tag"] == t %}selected{% endif %}>{{ t }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-md-2 d-flex align-items-end">
+    <button type="submit" class="btn btn-primary w-100">Aplicar filtros</button>
+  </div>
+</form>
+
+<div class="row g-3 mb-4">
+  <!-- Total de pedidos -->
+  <div class="col-md-3">
+    <div class="card text-bg-primary h-100">
+      <div class="card-body">
+        <h6 class="card-title">Total de pedidos</h6>
+        <p class="display-6 mb-0">{{ total_pedidos or 0 }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Valor total -->
+  <div class="col-md-3">
+    <div class="card text-bg-success h-100">
+      <div class="card-body">
+        <h6 class="card-title">Valor total (filtro)</h6>
+        <p class="h3 mb-0">
+          R$
+          {{ "{:,.2f}".format(total_valor).replace(',', 'X').replace('.', ',').replace('X', '.') }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Aguardando pagamento -->
+  <div class="col-md-3">
+    <div class="card text-bg-secondary h-100">
+      <div class="card-body">
+        <h6 class="card-title">Aguardando pagamento (R$)</h6>
+        <p class="h5 mb-0">
+          R$
+          {{ "{:,.2f}".format(valor_aguardando_pagamento).replace(',', 'X').replace('.', ',').replace('X', '.') }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="row g-3 mb-4">
+  <!-- Pago -->
+  <div class="col-md-3">
+    <div class="card text-bg-info h-100">
+      <div class="card-body">
+        <h6 class="card-title">Pago (R$)</h6>
+        <p class="h4 mb-0">R$ {{ (valor_pago or 0)|brl }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cancelado -->
+  <div class="col-md-3">
+    <div class="card text-bg-dark h-100">
+      <div class="card-body">
+        <h6 class="card-title">Cancelado (R$)</h6>
+        <p class="h5 mb-0">R$ {{ (valor_cancelado or 0)|brl }}</p>
+      </div>
+    </div>
+  </div>
+
+<!-- Resumo por status (no lugar do Em aberto) -->
+  <div class="col-md-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <h6 class="card-title mb-2">Resumo por status</h6>
+
+        {% if por_status %}
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead>
+                <tr>
+                  <th class="small text-muted">Status</th>
+                  <th class="small text-muted text-end">Qtd</th>
+                  <th class="small text-muted text-end">R$</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for s in por_status %}
+                <tr>
+                  <td class="small">{{ s.status_pedido or 'Sem status' }}</td>
+                  <td class="small text-end">{{ s.qtd }}</td>
+                  <td class="small text-end">
+                    {{ "{:,.2f}".format(s.valor_total).replace(',', 'X').replace('.', ',').replace('X', '.') }}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-muted mb-0">Sem dados no filtro.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Última atualização -->
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <h6 class="card-title">Última atualização (dentro do filtro)</h6>
+
+        {% if ultimo_pedido %}
+          <p class="mb-1"><strong>Data/hora:</strong> {{ ultima_atualizacao or "" }}</p>
+          <p class="mb-1">
+            <strong>Equipamento:</strong>
+            {{ ultimo_pedido["nome_veiculo"] or "" }}
+            {% if ultimo_pedido["tag"] %} ({{ ultimo_pedido["tag"] }}){% endif %}
+          </p>
+          <p class="mb-1">
+            <strong>PC:</strong> {{ ultimo_pedido["numero_pc"] or "" }}
+            &nbsp;|&nbsp;
+            <strong>SC:</strong> {{ ultimo_pedido["numero_sc"] or "" }}
+          </p>
+          <p class="mb-1"><strong>Fornecedor:</strong> {{ ultimo_pedido["nome_fornecedor"] or "" }}</p>
+          <p class="mb-0">
+            <strong>Status:</strong> {{ ultimo_pedido["status_pedido"] or "" }}
+            &nbsp;|&nbsp;
+            <strong>Valor:</strong> R$ {{ (ultimo_pedido["valor_pedido"] or 0)|brl }}
+          </p>
+        {% else %}
+          <p class="text-muted mb-0">Nenhum pedido dentro dos filtros selecionados.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="my-4">
+
+<div class="row g-3 mb-4">
+  <!-- Gráfico: Valor por status -->
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <h6 class="card-title">Valor por status</h6>
+        <canvas id="chartStatus"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráfico: Top 5 equipamentos por valor -->
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <h6 class="card-title">Top 5 equipamentos por valor</h6>
+        <canvas id="chartEquipamentos"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="my-4">
+
+
+
+<h5>Últimos pedidos cadastrados (dentro do filtro)</h5>
+{% if ultimos_pedidos %}
+  <table class="table table-sm table-striped table-hover align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>Data cadastro</th>
+        <th>Equipamento</th>
+        <th>TAG</th>
+        <th>PC</th>
+        <th>Fornecedor</th>
+        <th>Status</th>
+        <th class="text-end">Valor (R$)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in ultimos_pedidos %}
+        <tr>
+          <td>{{ p["data_cadastro"] or "" }}</td>
+          <td>{{ p["nome_veiculo"] or "" }}</td>
+          <td>{{ p["tag"] or "" }}</td>
+          <td>{{ p["numero_pc"] or "" }}</td>
+          <td>{{ p["nome_fornecedor"] or "" }}</td>
+          <td>{{ p["status_pedido"] or "" }}</td>
+          <td class="text-end">R$ {{ (p["valor_pedido"] or 0)|brl }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p class="text-muted">Nenhum pedido encontrado com os filtros atuais.</p>
+{% endif %}
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const dadosStatus = {{ por_status|default([])|tojson }};
+  const dadosTopEquip = {{ top_equipamentos|default([])|tojson }};
+
+  // --------- Gráfico: Valor por status ---------
+  const ctxStatus = document.getElementById('chartStatus').getContext('2d');
+  const labelsStatus = dadosStatus.map(s => s.status_pedido || 'Sem status');
+  const valoresStatus = dadosStatus.map(s => Number(s.valor_total || 0));
+
+  new Chart(ctxStatus, {
+    type: 'bar',
+    data: {
+      labels: labelsStatus,
+      datasets: [{
+        label: 'Valor por status (R$)',
+        data: valoresStatus,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const value = context.parsed.y || 0;
+              return 'R$ ' + value.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: value => 'R$ ' + Number(value).toLocaleString('pt-BR')
+          }
+        }
+      }
+    }
+  });
+
+  // --------- Gráfico: Top 5 equipamentos ---------
+  const ctxEquip = document.getElementById('chartEquipamentos').getContext('2d');
+  const labelsEquip = dadosTopEquip.map(e => e.nome_veiculo || 'N/A');
+  const valoresEquip = dadosTopEquip.map(e => Number(e.valor_total || 0));
+
+  new Chart(ctxEquip, {
+    type: 'bar',
+    data: {
+      labels: labelsEquip,
+      datasets: [{
+        label: 'Valor por equipamento (R$)',
+        data: valoresEquip,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const value = context.parsed.x || 0;
+              return 'R$ ' + value.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          ticks: {
+            callback: value => 'R$ ' + Number(value).toLocaleString('pt-BR')
+          }
+        }
+      }
+    }
+  });
+</script>
+
+{% endblock %}

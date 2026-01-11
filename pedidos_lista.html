@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Pedidos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Pedidos</h3>
+  <a class="btn btn-primary" href="{{ url_for('novo_pedido') }}">+ Novo pedido</a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-3">
+    <label class="form-label">TAG</label>
+    <input class="form-control" name="tag" value="{{ filtros.tag }}" placeholder="Ex: CBF-15">
+  </div>
+
+  <div class="col-md-5">
+    <label class="form-label">Fornecedor</label>
+    <input class="form-control" name="fornecedor" value="{{ filtros.fornecedor }}" placeholder="Nome do fornecedor">
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">Valor mín.</label>
+    <input class="form-control" name="valor_min" value="{{ filtros.valor_min }}" placeholder="Ex: 1000,00">
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">Valor máx.</label>
+    <input class="form-control" name="valor_max" value="{{ filtros.valor_max }}" placeholder="Ex: 5000,00">
+  </div>
+
+  <div class="col-12 d-flex gap-2">
+    <button class="btn btn-outline-primary" type="submit">Buscar</button>
+    <a class="btn btn-outline-secondary" href="{{ url_for('listar_pedidos') }}">Limpar</a>
+
+    <div class="ms-auto text-end">
+      <div class="small text-muted">Registros: <strong>{{ total_qtd }}</strong></div>
+      <div class="small text-muted">Total: <strong>R$ {{ total_valor|brl }}</strong></div>
+    </div>
+  </div>
+</form>
+
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-sm table-striped table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>TAG</th>
+            <th>SC</th>
+            <th>PC</th>
+            <th>Status</th>
+            <th class="text-end">Valor (R$)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in pedidos %}
+          <tr>
+            <td>{{ p.tag }}</td>
+            <td>{{ p.numero_sc }}</td>
+            <td>{{ p.numero_pc }}</td>
+            <td>{{ p.status_pedido }}</td>
+            <td class="text-end">R$ {{ (p.valor_pedido or 0)|brl }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" class="text-center text-muted py-4">Nenhum pedido encontrado.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

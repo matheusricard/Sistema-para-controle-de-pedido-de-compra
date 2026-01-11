@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Pedidos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Pedidos</h3>
+  <a class="btn btn-primary" href="{{ url_for('novo_pedido') }}">+ Novo pedido</a>
+</div>
+
+<!-- FILTROS -->
+<form method="get" class="row g-3 mb-3">
+  <div class="col-md-5">
+    <label class="form-label">TAG (pode selecionar várias)</label>
+    <select class="form-select" name="tags" multiple size="7">
+      {% for t in lista_tags %}
+        <option value="{{ t }}" {% if filtros.tags and (t in filtros.tags) %}selected{% endif %}>
+          {{ t }}
+        </option>
+      {% endfor %}
+    </select>
+    <div class="form-text">Dica: segure <b>Ctrl</b> (ou <b>Shift</b>) para selecionar várias.</div>
+  </div>
+
+  <div class="col-md-4">
+    <label class="form-label">Status</label>
+    <select class="form-select" name="status">
+      <option value="">Todos</option>
+      {% for s in lista_status %}
+        <option value="{{ s }}" {% if filtros.status == s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-md-3 d-flex align-items-end gap-2">
+    <button class="btn btn-primary w-100" type="submit">Filtrar</button>
+    <a class="btn btn-outline-secondary w-100" href="{{ url_for('listar_pedidos') }}">Limpar</a>
+  </div>
+</form>
+
+<!-- RESUMO -->
+<div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+  <span class="badge text-bg-light border">
+    <strong>Total registros:</strong> {{ pedidos|length }}
+  </span>
+  {% if total_valor is defined %}
+  <span class="badge text-bg-light border">
+    <strong>Valor exibido:</strong> R$ {{ total_valor|brl }}
+  </span>
+  {% endif %}
+  {% if filtros.tags %}
+  <span class="badge text-bg-info">
+    TAGs: {{ filtros.tags|join(", ") }}
+  </span>
+  {% endif %}
+  {% if filtros.status %}
+  <span class="badge text-bg-warning">
+    Status: {{ filtros.status }}
+  </span>
+  {% endif %}
+</div>
+
+<!-- TABELA -->
+<div class="table-responsive">
+  <table class="table table-sm table-striped table-hover align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>TAG</th>
+        <th>SC</th>
+        <th>PC</th>
+        <th>Status</th>
+        <th style="min-width: 320px;">Itens</th>
+        <th class="text-end">Valor (R$)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% if pedidos %}
+        {% for p in pedidos %}
+        <tr>
+          <td><strong>{{ p.tag }}</strong></td>
+          <td>{{ p.numero_sc or "-" }}</td>
+          <td>{{ p.numero_pc or "-" }}</td>
+          <td>{{ (p.status_pedido or "SEM STATUS") }}</td>
+          <td>
+            {% set itens = (p.descricao_itens or "") %}
+            {% if itens|length > 120 %}
+              <span>{{ itens[:120] }}...</span>
+              <details class="mt-1">
+                <summary class="text-primary" style="cursor:pointer;">ver mais</summary>
+                <div class="mt-2" style="white-space: pre-wrap;">{{ itens }}</div>
+              </details>
+            {% else %}
+              <div style="white-space: pre-wrap;">{{ itens if itens else "-" }}</div>
+            {% endif %}
+          </td>
+          <td class="text-end">
+            {{ (p.valor_pedido or 0)|brl }}
+          </td>
+        </tr>
+        {% endfor %}
+      {% else %}
+        <tr>
+          <td colspan="7" class="text-center text-muted py-4">
+            Nenhum pedido encontrado com os filtros atuais.
+          </td>
+        </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
